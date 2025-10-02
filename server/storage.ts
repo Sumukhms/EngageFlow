@@ -633,7 +633,11 @@ class DbStorage implements IStorage {
     if (!process.env.DATABASE_URL) {
       throw new Error("DATABASE_URL environment variable is not set");
     }
-    const sql = neon(process.env.DATABASE_URL);
+    const sql = neon(process.env.DATABASE_URL, {
+      fetchOptions: {
+        cache: 'no-store',
+      },
+    });
     this.db = drizzle(sql);
   }
 
@@ -949,4 +953,8 @@ class DbStorage implements IStorage {
   }
 }
 
-export const storage = process.env.DATABASE_URL ? new DbStorage() : new MemStorage();
+// Using MemStorage for now due to local database setup
+// Switch to DbStorage when using Neon cloud database
+export const storage = (process.env.DATABASE_URL && process.env.DATABASE_URL.includes('neon.tech')) 
+  ? new DbStorage() 
+  : new MemStorage();
