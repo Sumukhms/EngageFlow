@@ -1,17 +1,20 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock, MapPin, Users, Sparkles, CheckCircle2 } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import type { Event, InsertAttendee } from "@shared/schema";
+import { insertAttendeeSchema } from "@shared/schema";
 
 export default function PublicRegister() {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
@@ -172,12 +175,16 @@ function RegistrationDialog({
   onSuccess: () => void;
 }) {
   const { toast } = useToast();
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    company: "",
-    jobTitle: "",
-    interests: "",
+  
+  const form = useForm<InsertAttendee>({
+    resolver: zodResolver(insertAttendeeSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      company: "",
+      jobTitle: "",
+      interests: [],
+    },
   });
 
   const createAttendeeMutation = useMutation({
@@ -213,8 +220,8 @@ function RegistrationDialog({
         title: "Success!",
         description: "You've been registered for the event",
       });
+      form.reset();
       onSuccess();
-      setFormData({ name: "", email: "", company: "", jobTitle: "", interests: "" });
     },
     onError: (error: Error) => {
       toast({
@@ -225,18 +232,8 @@ function RegistrationDialog({
     },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    const attendeeData: InsertAttendee = {
-      name: formData.name,
-      email: formData.email,
-      company: formData.company || undefined,
-      jobTitle: formData.jobTitle || undefined,
-      interests: formData.interests.split(",").map(i => i.trim()).filter(Boolean),
-    };
-
-    createAttendeeMutation.mutate(attendeeData);
+  const handleSubmit = (data: InsertAttendee) => {
+    createAttendeeMutation.mutate(data);
   };
 
   const isPending = createAttendeeMutation.isPending || registerForEventMutation.isPending;
@@ -250,74 +247,96 @@ function RegistrationDialog({
             Fill in your details to complete registration. We'll send you personalized event updates and reminders.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Full Name *</Label>
-            <Input
-              id="name"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              placeholder="John Doe"
-              required
-              data-testid="input-name"
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Full Name *</FormLabel>
+                  <FormControl>
+                    <Input placeholder="John Doe" data-testid="input-name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="email">Email *</Label>
-            <Input
-              id="email"
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              placeholder="john@example.com"
-              required
-              data-testid="input-email"
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email *</FormLabel>
+                  <FormControl>
+                    <Input type="email" placeholder="john@example.com" data-testid="input-email" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="company">Company</Label>
-            <Input
-              id="company"
-              value={formData.company}
-              onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-              placeholder="Acme Inc"
-              data-testid="input-company"
+            <FormField
+              control={form.control}
+              name="company"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Company</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Acme Inc" data-testid="input-company" {...field} value={field.value || ""} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="jobTitle">Job Title</Label>
-            <Input
-              id="jobTitle"
-              value={formData.jobTitle}
-              onChange={(e) => setFormData({ ...formData, jobTitle: e.target.value })}
-              placeholder="Product Manager"
-              data-testid="input-jobtitle"
+            <FormField
+              control={form.control}
+              name="jobTitle"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Job Title</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Product Manager" data-testid="input-jobtitle" {...field} value={field.value || ""} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="interests">Interests (comma-separated)</Label>
-            <Textarea
-              id="interests"
-              value={formData.interests}
-              onChange={(e) => setFormData({ ...formData, interests: e.target.value })}
-              placeholder="Technology, Marketing, AI"
-              data-testid="input-interests"
+            <FormField
+              control={form.control}
+              name="interests"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Interests (comma-separated)</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Technology, Marketing, AI"
+                      data-testid="input-interests"
+                      value={field.value?.join(", ") || ""}
+                      onChange={(e) => {
+                        const interests = e.target.value.split(",").map(i => i.trim()).filter(Boolean);
+                        field.onChange(interests);
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-          <div className="flex gap-3 pt-4">
-            <Button type="button" variant="outline" onClick={onClose} className="flex-1">
-              Cancel
-            </Button>
-            <Button 
-              type="submit" 
-              className="flex-1 gradient-primary" 
-              disabled={isPending}
-              data-testid="button-submit-registration"
-            >
-              {isPending ? "Registering..." : "Complete Registration"}
-            </Button>
-          </div>
-        </form>
+            <div className="flex gap-3 pt-4">
+              <Button type="button" variant="outline" onClick={onClose} className="flex-1">
+                Cancel
+              </Button>
+              <Button 
+                type="submit" 
+                className="flex-1 gradient-primary" 
+                disabled={isPending}
+                data-testid="button-submit-registration"
+              >
+                {isPending ? "Registering..." : "Complete Registration"}
+              </Button>
+            </div>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

@@ -55,7 +55,9 @@ interface OnboardingTourProps {
 
 export function OnboardingTour({ onComplete }: OnboardingTourProps) {
   const [currentStep, setCurrentStep] = useState(0);
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible, setIsVisible] = useState(() => {
+    return !localStorage.getItem("onboarding-tour-completed");
+  });
 
   const handleNext = () => {
     if (currentStep < tourSteps.length - 1) {
@@ -73,10 +75,12 @@ export function OnboardingTour({ onComplete }: OnboardingTourProps) {
 
   const handleComplete = () => {
     setIsVisible(false);
+    localStorage.setItem("onboarding-tour-completed", "true");
     onComplete();
   };
 
   const handleSkip = () => {
+    localStorage.setItem("onboarding-tour-completed", "true");
     handleComplete();
   };
 
