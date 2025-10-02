@@ -1,8 +1,8 @@
-# Event Management Platform
+# Event & Webinar Engagement Booster
 
 ## Overview
 
-This is a full-stack event management and email marketing platform built with React, Express, and PostgreSQL. The application enables users to create and manage events, track attendees, send personalized email campaigns, and analyze engagement metrics. It features AI-powered email personalization using OpenAI's GPT-5 model and automated scheduling for campaigns and reminders.
+This is a full-stack event management and email marketing platform built with React, Express, and TypeScript. The application helps event organizers boost engagement before and after webinars by tracking registrations, user interests, and engagement patterns. It sends personalized reminders, content previews, and post-event follow-ups via email. The platform features AI-powered email personalization using OpenAI's GPT-5 model and automated scheduling for campaigns and reminders.
 
 ## User Preferences
 
@@ -81,10 +81,11 @@ The schema includes six main entities:
 - Note: GPT-5 was released August 7, 2025. It does not support temperature parameter and uses max_completion_tokens instead of max_tokens.
 
 **Database Service**
-- Neon Serverless Postgres for cloud-hosted database (DATABASE_URL is configured)
-- Connection pooling via @neondatabase/serverless
-- Environment-based configuration with DATABASE_URL
-- DbStorage class automatically used when DATABASE_URL exists, falls back to MemStorage otherwise
+- Currently using MemStorage (in-memory) for data persistence in development
+- DbStorage implementation available for Neon cloud database (requires DATABASE_URL with 'neon.tech' domain)
+- Connection pooling via @neondatabase/serverless for Neon databases
+- Automatic fallback: Uses DbStorage when DATABASE_URL contains 'neon.tech', otherwise uses MemStorage
+- Note: Local PostgreSQL databases are not supported due to Neon HTTP driver incompatibility
 
 **Scheduled Tasks**
 - Node-cron for time-based job scheduling
@@ -137,3 +138,54 @@ AI personalization is optional per campaign and generates:
 - Lazy loading for route-based code splitting
 - Optimistic updates for instant UI feedback
 - Database indexes on frequently queried fields (implied by schema design)
+
+## Environment Variables
+
+The following environment variables are required for full functionality:
+
+### Required
+- `PORT`: Server port (default: 5000)
+- `NODE_ENV`: Environment mode (development/production)
+
+### Optional (for enhanced features)
+- `DATABASE_URL`: Neon PostgreSQL connection string (must contain 'neon.tech' domain). Falls back to MemStorage if not provided or incompatible.
+- `OPENAI_API_KEY`: OpenAI API key for AI-powered email personalization using GPT-5
+- `RESEND_API_KEY` or `RESEND_API_KEY_ENV_VAR`: Resend email service API key for sending campaigns
+- `SENDGRID_API_KEY` or `SENDGRID_API_KEY_ENV_VAR`: SendGrid email service API key (fallback option)
+
+## Running the Application
+
+### Development
+```bash
+npm run dev
+```
+Starts the development server on port 5000 with hot reloading.
+
+### Production Build
+```bash
+npm run build
+npm run start
+```
+
+### Database Schema
+```bash
+npm run db:push
+```
+Pushes the Drizzle schema to the database (requires Neon PostgreSQL DATABASE_URL).
+
+## Deployment
+
+The application is configured for **autoscale deployment** on Replit (see `.replit` file):
+- Deployment target: `autoscale`
+- Build command: `npm run build`
+- Run command: `npm run start`
+- Port configuration: Local port 5000 mapped to external port 80
+- Serves on port 5000 (required for Replit environment)
+
+## Current Status
+
+- ✅ Frontend running with React + Vite + TypeScript
+- ✅ Backend API with Express and in-memory storage (MemStorage)
+- ✅ AI personalization ready (requires OPENAI_API_KEY)
+- ⚠️ Email sending requires API keys (RESEND_API_KEY or SENDGRID_API_KEY)
+- ⚠️ Database persistence requires Neon cloud database (DATABASE_URL with 'neon.tech')
