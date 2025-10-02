@@ -65,7 +65,7 @@ export function EventCard({ event, onDelete, isDeleting }: EventCardProps) {
     };
   };
 
-  const { date, time } = formatDate(event.startDate);
+  const { date, time } = formatDate(event.startDate.toString());
 
   return (
     <>
@@ -77,8 +77,8 @@ export function EventCard({ event, onDelete, isDeleting }: EventCardProps) {
             className="w-full h-48 object-cover"
           />
           <div className="absolute top-4 right-4">
-            <Badge className={getStatusColor(event.status)}>
-              {event.status}
+            <Badge className={getStatusColor(event.status || "draft")}>
+              {event.status || "draft"}
             </Badge>
           </div>
         </div>

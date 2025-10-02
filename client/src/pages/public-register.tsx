@@ -79,8 +79,8 @@ export default function PublicRegister() {
                 )}
                 <CardHeader>
                   <div className="flex items-start justify-between mb-2">
-                    <Badge className={getStatusColor(event.status)}>
-                      {event.status}
+                    <Badge className={getStatusColor(event.status || "draft")}>
+                      {event.status || "draft"}
                     </Badge>
                     {event.tags && event.tags.length > 0 && (
                       <Badge variant="outline">{event.tags[0]}</Badge>

@@ -9,7 +9,8 @@ import {
   FileText,
   Settings,
   Plug,
-  Home
+  Home,
+  Globe
 } from "lucide-react";
 
 interface SidebarProps {
@@ -25,6 +26,7 @@ const navigation = [
   { name: "Email Campaigns", href: "/campaigns", icon: Mail },
   { name: "Analytics", href: "/analytics", icon: BarChart3 },
   { name: "Templates", href: "/templates", icon: FileText },
+  { name: "Public Registration", href: "/register", icon: Globe },
 ];
 
 const settingsNavigation = [
