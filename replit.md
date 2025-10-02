@@ -67,21 +67,24 @@ The schema includes six main entities:
 ### External Dependencies
 
 **Email Service Providers**
-- Resend as primary email provider with fallback support
-- SendGrid as alternative provider (configurable via environment)
+- Resend as primary email provider with fallback support (requires RESEND_API_KEY env var)
+- SendGrid as alternative provider (configurable via environment, requires SENDGRID_API_KEY)
 - Template-based email rendering with variable interpolation
 - Bulk sending capabilities for campaigns
+- Note: User has not set up Replit's Resend integration connector. Email features require manual API key configuration via secrets.
 
 **AI Integration**
-- OpenAI GPT-5 for email content personalization
+- OpenAI GPT-5 for email content personalization (requires OPENAI_API_KEY env var)
 - Context-aware generation based on attendee engagement history
 - JSON-structured responses for consistent parsing
 - Personalization considers attendee interests, company, and event details
+- Note: GPT-5 was released August 7, 2025. It does not support temperature parameter and uses max_completion_tokens instead of max_tokens.
 
 **Database Service**
-- Neon Serverless Postgres for cloud-hosted database
+- Neon Serverless Postgres for cloud-hosted database (DATABASE_URL is configured)
 - Connection pooling via @neondatabase/serverless
 - Environment-based configuration with DATABASE_URL
+- DbStorage class automatically used when DATABASE_URL exists, falls back to MemStorage otherwise
 
 **Scheduled Tasks**
 - Node-cron for time-based job scheduling
