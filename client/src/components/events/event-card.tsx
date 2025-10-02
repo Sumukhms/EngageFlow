@@ -3,8 +3,9 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Calendar, Clock, MapPin, Users, Edit, Trash, Eye } from "lucide-react";
+import { Calendar, Clock, MapPin, Users, Edit, Trash, Eye, UserPlus } from "lucide-react";
 import { EventForm } from "./event-form";
+import { RegistrationWalkthrough } from "./registration-walkthrough";
 import { useQuery } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import type { Event, EventRegistration } from "@shared/schema";
@@ -28,6 +29,7 @@ interface EventCardProps {
 
 export function EventCard({ event, onDelete, isDeleting }: EventCardProps) {
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isRegisterOpen, setIsRegisterOpen] = useState(false);
 
   const { data: registrations } = useQuery<EventRegistration[]>({
     queryKey: ["/api/events", event.id, "registrations"],
@@ -41,6 +43,8 @@ export function EventCard({ event, onDelete, isDeleting }: EventCardProps) {
   const registrationCount = registrations?.length || 0;
   const maxAttendees = event.maxAttendees || 100;
   const fillPercentage = Math.min((registrationCount / maxAttendees) * 100, 100);
+  const isFull = event.maxAttendees ? registrationCount >= event.maxAttendees : false;
+  const canRegister = event.status === "published" || event.status === "live";
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -150,17 +154,30 @@ export function EventCard({ event, onDelete, isDeleting }: EventCardProps) {
           )}
 
           {/* Actions */}
-          <div className="flex items-center justify-between pt-2 border-t">
-            <Button 
-              variant="outline" 
-              size="sm"
-              data-testid={`view-event-${event.id}`}
-            >
-              <Eye className="w-3 h-3 mr-1" />
-              View
-            </Button>
+          <div className="flex items-center justify-between pt-2 border-t gap-2">
+            {canRegister && (
+              <Button 
+                variant="default" 
+                size="sm"
+                onClick={() => setIsRegisterOpen(true)}
+                disabled={isFull}
+                className="flex-1"
+                data-testid={`register-event-${event.id}`}
+              >
+                <UserPlus className="w-3 h-3 mr-1" />
+                {isFull ? "Event Full" : "Register"}
+              </Button>
+            )}
             
             <div className="flex items-center space-x-1">
+              <Button 
+                variant="outline" 
+                size="sm"
+                data-testid={`view-event-${event.id}`}
+              >
+                <Eye className="w-3 h-3" />
+              </Button>
+              
               <Button 
                 variant="outline" 
                 size="sm"
@@ -221,6 +238,16 @@ export function EventCard({ event, onDelete, isDeleting }: EventCardProps) {
           />
         </DialogContent>
       </Dialog>
+
+      {/* Registration Walkthrough */}
+      <RegistrationWalkthrough 
+        event={event}
+        open={isRegisterOpen}
+        onOpenChange={setIsRegisterOpen}
+        onSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: ["/api/events", event.id, "registrations"] });
+        }}
+      />
     </>
   );
 }
