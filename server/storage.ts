@@ -7,9 +7,21 @@ import {
   type EmailSend,
   type ContentPreview, type InsertContentPreview,
   type AnalyticsEvent, type InsertAnalyticsEvent,
-  type User, type InsertUser 
+  type User, type InsertUser,
+  events,
+  attendees,
+  eventRegistrations,
+  emailCampaigns,
+  emailTemplates,
+  emailSends,
+  contentPreviews,
+  analyticsEvents,
+  users
 } from "@shared/schema";
 import { randomUUID } from "crypto";
+import { drizzle } from "drizzle-orm/neon-http";
+import { neon } from "@neondatabase/serverless";
+import { eq, and, gte, lte, desc, sql as drizzleSql } from "drizzle-orm";
 
 export interface IStorage {
   // User methods
@@ -614,4 +626,327 @@ The EventBoost Team`,
   }
 }
 
-export const storage = new MemStorage();
+class DbStorage implements IStorage {
+  private db;
+
+  constructor() {
+    if (!process.env.DATABASE_URL) {
+      throw new Error("DATABASE_URL environment variable is not set");
+    }
+    const sql = neon(process.env.DATABASE_URL);
+    this.db = drizzle(sql);
+  }
+
+  async getUser(id: string): Promise<User | undefined> {
+    const result = await this.db.select().from(users).where(eq(users.id, id));
+    return result[0];
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const result = await this.db.select().from(users).where(eq(users.username, username));
+    return result[0];
+  }
+
+  async createUser(user: InsertUser): Promise<User> {
+    const result = await this.db.insert(users).values([user]).returning();
+    return result[0];
+  }
+
+  async getEvents(): Promise<Event[]> {
+    return await this.db.select().from(events).orderBy(desc(events.createdAt));
+  }
+
+  async getEvent(id: string): Promise<Event | undefined> {
+    const result = await this.db.select().from(events).where(eq(events.id, id));
+    return result[0];
+  }
+
+  async createEvent(event: InsertEvent): Promise<Event> {
+    const result = await this.db.insert(events).values([event]).returning();
+    return result[0];
+  }
+
+  async updateEvent(id: string, event: Partial<Event>): Promise<Event | undefined> {
+    const result = await this.db
+      .update(events)
+      .set({ ...event, updatedAt: new Date() })
+      .where(eq(events.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deleteEvent(id: string): Promise<boolean> {
+    const result = await this.db.delete(events).where(eq(events.id, id)).returning();
+    return result.length > 0;
+  }
+
+  async getAttendees(): Promise<Attendee[]> {
+    return await this.db.select().from(attendees).orderBy(desc(attendees.registrationDate));
+  }
+
+  async getAttendee(id: string): Promise<Attendee | undefined> {
+    const result = await this.db.select().from(attendees).where(eq(attendees.id, id));
+    return result[0];
+  }
+
+  async getAttendeeByEmail(email: string): Promise<Attendee | undefined> {
+    const result = await this.db.select().from(attendees).where(eq(attendees.email, email));
+    return result[0];
+  }
+
+  async createAttendee(attendee: InsertAttendee): Promise<Attendee> {
+    const result = await this.db.insert(attendees).values([attendee]).returning();
+    return result[0];
+  }
+
+  async updateAttendee(id: string, attendeeUpdate: Partial<Attendee>): Promise<Attendee | undefined> {
+    const result = await this.db
+      .update(attendees)
+      .set({ ...attendeeUpdate, lastActivity: new Date() })
+      .where(eq(attendees.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async updateAttendeeEngagement(id: string, score: number): Promise<void> {
+    await this.db
+      .update(attendees)
+      .set({ engagementScore: score, lastActivity: new Date() })
+      .where(eq(attendees.id, id));
+  }
+
+  async getEventRegistrations(eventId?: string): Promise<EventRegistration[]> {
+    if (eventId) {
+      return await this.db
+        .select()
+        .from(eventRegistrations)
+        .where(eq(eventRegistrations.eventId, eventId))
+        .orderBy(desc(eventRegistrations.registrationDate));
+    }
+    return await this.db.select().from(eventRegistrations).orderBy(desc(eventRegistrations.registrationDate));
+  }
+
+  async getAttendeeRegistrations(attendeeId: string): Promise<EventRegistration[]> {
+    return await this.db
+      .select()
+      .from(eventRegistrations)
+      .where(eq(eventRegistrations.attendeeId, attendeeId))
+      .orderBy(desc(eventRegistrations.registrationDate));
+  }
+
+  async createEventRegistration(registration: InsertEventRegistration): Promise<EventRegistration> {
+    const result = await this.db.insert(eventRegistrations).values([registration]).returning();
+    
+    await this.createAnalyticsEvent({
+      eventType: "registration",
+      attendeeId: registration.attendeeId,
+      eventId: registration.eventId,
+      metadata: { registrationId: result[0].id },
+    });
+    
+    return result[0];
+  }
+
+  async updateEventRegistration(id: string, registration: Partial<EventRegistration>): Promise<EventRegistration | undefined> {
+    const result = await this.db
+      .update(eventRegistrations)
+      .set(registration)
+      .where(eq(eventRegistrations.id, id))
+      .returning();
+
+    if (registration.attended === true && result[0]) {
+      await this.createAnalyticsEvent({
+        eventType: "attendance",
+        attendeeId: result[0].attendeeId,
+        eventId: result[0].eventId,
+        metadata: { registrationId: id, attendanceTime: registration.attendanceTime },
+      });
+    }
+
+    return result[0];
+  }
+
+  async getEmailCampaigns(): Promise<EmailCampaign[]> {
+    return await this.db.select().from(emailCampaigns).orderBy(desc(emailCampaigns.createdAt));
+  }
+
+  async getEmailCampaign(id: string): Promise<EmailCampaign | undefined> {
+    const result = await this.db.select().from(emailCampaigns).where(eq(emailCampaigns.id, id));
+    return result[0];
+  }
+
+  async createEmailCampaign(campaign: InsertEmailCampaign): Promise<EmailCampaign> {
+    const result = await this.db.insert(emailCampaigns).values([campaign]).returning();
+    return result[0];
+  }
+
+  async updateEmailCampaign(id: string, campaign: Partial<EmailCampaign>): Promise<EmailCampaign | undefined> {
+    const result = await this.db
+      .update(emailCampaigns)
+      .set(campaign)
+      .where(eq(emailCampaigns.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async getScheduledCampaigns(): Promise<EmailCampaign[]> {
+    const now = new Date();
+    return await this.db
+      .select()
+      .from(emailCampaigns)
+      .where(and(
+        eq(emailCampaigns.status, "scheduled"),
+        lte(emailCampaigns.scheduledAt, now)
+      ));
+  }
+
+  async getEmailTemplates(): Promise<EmailTemplate[]> {
+    return await this.db
+      .select()
+      .from(emailTemplates)
+      .where(eq(emailTemplates.isActive, true))
+      .orderBy(desc(emailTemplates.createdAt));
+  }
+
+  async getEmailTemplate(id: string): Promise<EmailTemplate | undefined> {
+    const result = await this.db.select().from(emailTemplates).where(eq(emailTemplates.id, id));
+    return result[0];
+  }
+
+  async createEmailTemplate(template: InsertEmailTemplate): Promise<EmailTemplate> {
+    const result = await this.db.insert(emailTemplates).values([template]).returning();
+    return result[0];
+  }
+
+  async updateEmailTemplate(id: string, template: Partial<EmailTemplate>): Promise<EmailTemplate | undefined> {
+    const result = await this.db
+      .update(emailTemplates)
+      .set({ ...template, updatedAt: new Date() })
+      .where(eq(emailTemplates.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async createEmailSend(send: Omit<EmailSend, 'id'>): Promise<EmailSend> {
+    const result = await this.db.insert(emailSends).values([send]).returning();
+    return result[0];
+  }
+
+  async updateEmailSend(id: string, send: Partial<EmailSend>): Promise<void> {
+    await this.db.update(emailSends).set(send).where(eq(emailSends.id, id));
+  }
+
+  async getEmailSendStats(campaignId: string): Promise<{ sent: number; opened: number; clicked: number; bounced: number }> {
+    const sends = await this.db
+      .select()
+      .from(emailSends)
+      .where(eq(emailSends.campaignId, campaignId));
+
+    return {
+      sent: sends.length,
+      opened: sends.filter(s => s.openedAt !== null).length,
+      clicked: sends.filter(s => s.clickedAt !== null).length,
+      bounced: sends.filter(s => s.bounced === true).length,
+    };
+  }
+
+  async getContentPreviews(eventId: string): Promise<ContentPreview[]> {
+    return await this.db
+      .select()
+      .from(contentPreviews)
+      .where(eq(contentPreviews.eventId, eventId))
+      .orderBy(desc(contentPreviews.createdAt));
+  }
+
+  async createContentPreview(preview: InsertContentPreview): Promise<ContentPreview> {
+    const result = await this.db.insert(contentPreviews).values([preview]).returning();
+    return result[0];
+  }
+
+  async createAnalyticsEvent(event: InsertAnalyticsEvent): Promise<AnalyticsEvent> {
+    const result = await this.db.insert(analyticsEvents).values([event]).returning();
+    return result[0];
+  }
+
+  async getAnalyticsEvents(filters?: {
+    eventType?: string;
+    eventId?: string;
+    attendeeId?: string;
+    startDate?: Date;
+    endDate?: Date;
+  }): Promise<AnalyticsEvent[]> {
+    let query = this.db.select().from(analyticsEvents);
+
+    const conditions = [];
+    if (filters?.eventType) conditions.push(eq(analyticsEvents.eventType, filters.eventType as any));
+    if (filters?.eventId) conditions.push(eq(analyticsEvents.eventId, filters.eventId));
+    if (filters?.attendeeId) conditions.push(eq(analyticsEvents.attendeeId, filters.attendeeId));
+    if (filters?.startDate) conditions.push(gte(analyticsEvents.timestamp, filters.startDate));
+    if (filters?.endDate) conditions.push(lte(analyticsEvents.timestamp, filters.endDate));
+
+    if (conditions.length > 0) {
+      return await query.where(and(...conditions)).orderBy(desc(analyticsEvents.timestamp));
+    }
+
+    return await query.orderBy(desc(analyticsEvents.timestamp));
+  }
+
+  async getEngagementMetrics(days: number): Promise<{
+    registrations: { date: string; count: number }[];
+    attendance: { date: string; count: number }[];
+    engagement: { date: string; score: number }[];
+  }> {
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+
+    const events = await this.getAnalyticsEvents({ startDate, endDate });
+
+    const dateRange: string[] = [];
+    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+      dateRange.push(d.toISOString().split('T')[0]);
+    }
+
+    const registrationsByDate = new Map<string, number>();
+    const attendanceByDate = new Map<string, number>();
+    const engagementByDate = new Map<string, number[]>();
+
+    events.forEach(event => {
+      const date = event.timestamp!.toISOString().split('T')[0];
+      
+      switch (event.eventType) {
+        case 'registration':
+          registrationsByDate.set(date, (registrationsByDate.get(date) || 0) + 1);
+          break;
+        case 'attendance':
+          attendanceByDate.set(date, (attendanceByDate.get(date) || 0) + 1);
+          break;
+        case 'email_open':
+        case 'email_click':
+          if (!engagementByDate.has(date)) {
+            engagementByDate.set(date, []);
+          }
+          engagementByDate.get(date)!.push(event.eventType === 'email_click' ? 2 : 1);
+          break;
+      }
+    });
+
+    return {
+      registrations: dateRange.map(date => ({
+        date,
+        count: registrationsByDate.get(date) || 0,
+      })),
+      attendance: dateRange.map(date => ({
+        date,
+        count: attendanceByDate.get(date) || 0,
+      })),
+      engagement: dateRange.map(date => {
+        const scores = engagementByDate.get(date) || [];
+        const avgScore = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
+        return { date, score: Math.round(avgScore * 10) / 10 };
+      }),
+    };
+  }
+}
+
+export const storage = process.env.DATABASE_URL ? new DbStorage() : new MemStorage();
