@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Plus, Search, Filter, Send, Calendar } from "lucide-react";
+import { Plus, Search, Filter, Send, Calendar, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -51,7 +51,7 @@ export default function Campaigns() {
     return matchesSearch && matchesStatus;
   }) || [];
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string | null) => {
     switch (status) {
       case "sent": return "bg-chart-4 text-white";
       case "scheduled": return "bg-secondary text-secondary-foreground";

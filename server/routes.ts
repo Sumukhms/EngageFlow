@@ -43,7 +43,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const event = await storage.createEvent(validatedData);
       res.status(201).json(event);
     } catch (error) {
-      res.status(400).json({ message: "Invalid event data", error: error.message });
+      res.status(400).json({ message: "Invalid event data", error: error instanceof Error ? error.message : String(error) });
     }
   });
 
@@ -106,7 +106,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const attendee = await storage.createAttendee(validatedData);
       res.status(201).json(attendee);
     } catch (error) {
-      res.status(400).json({ message: "Invalid attendee data", error: error.message });
+      res.status(400).json({ message: "Invalid attendee data", error: error instanceof Error ? error.message : String(error) });
     }
   });
 
@@ -177,7 +177,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.status(201).json(registration);
     } catch (error) {
-      res.status(400).json({ message: "Failed to register for event", error: error.message });
+      res.status(400).json({ message: "Failed to register for event", error: error instanceof Error ? error.message : String(error) });
     }
   });
 
@@ -227,7 +227,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.status(201).json(campaign);
     } catch (error) {
-      res.status(400).json({ message: "Invalid campaign data", error: error.message });
+      res.status(400).json({ message: "Invalid campaign data", error: error instanceof Error ? error.message : String(error) });
     }
   });
 
@@ -294,7 +294,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const template = await storage.createEmailTemplate(validatedData);
       res.status(201).json(template);
     } catch (error) {
-      res.status(400).json({ message: "Invalid template data", error: error.message });
+      res.status(400).json({ message: "Invalid template data", error: error instanceof Error ? error.message : String(error) });
     }
   });
 
@@ -329,7 +329,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const preview = await storage.createContentPreview(validatedData);
       res.status(201).json(preview);
     } catch (error) {
-      res.status(400).json({ message: "Invalid content preview data", error: error.message });
+      res.status(400).json({ message: "Invalid content preview data", error: error instanceof Error ? error.message : String(error) });
     }
   });
 
@@ -367,7 +367,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const analyticsEvent = await storage.createAnalyticsEvent(validatedData);
       res.status(201).json(analyticsEvent);
     } catch (error) {
-      res.status(400).json({ message: "Invalid analytics event data", error: error.message });
+      res.status(400).json({ message: "Invalid analytics event data", error: error instanceof Error ? error.message : String(error) });
     }
   });
 
@@ -440,7 +440,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json(personalized);
     } catch (error) {
-      res.status(500).json({ message: "Failed to personalize content", error: error.message });
+      res.status(500).json({ message: "Failed to personalize content", error: error instanceof Error ? error.message : String(error) });
     }
   });
 
@@ -460,7 +460,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json(suggestions);
     } catch (error) {
-      res.status(500).json({ message: "Failed to generate content suggestions", error: error.message });
+      res.status(500).json({ message: "Failed to generate content suggestions", error: error instanceof Error ? error.message : String(error) });
     }
   });
 

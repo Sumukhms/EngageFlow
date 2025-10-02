@@ -207,7 +207,17 @@ The EventBoost Team`,
     const id = randomUUID();
     const now = new Date();
     const event: Event = {
-      ...insertEvent,
+      title: insertEvent.title,
+      description: insertEvent.description ?? null,
+      startDate: insertEvent.startDate,
+      endDate: insertEvent.endDate ?? null,
+      timezone: insertEvent.timezone ?? null,
+      maxAttendees: insertEvent.maxAttendees ?? null,
+      isPublic: insertEvent.isPublic ?? null,
+      status: (insertEvent.status as any) ?? null,
+      imageUrl: insertEvent.imageUrl ?? null,
+      location: insertEvent.location ?? null,
+      tags: insertEvent.tags ?? null,
       id,
       createdAt: now,
       updatedAt: now,
@@ -246,7 +256,12 @@ The EventBoost Team`,
     const id = randomUUID();
     const now = new Date();
     const attendee: Attendee = {
-      ...insertAttendee,
+      email: insertAttendee.email,
+      name: insertAttendee.name,
+      company: insertAttendee.company ?? null,
+      jobTitle: insertAttendee.jobTitle ?? null,
+      interests: insertAttendee.interests ?? null,
+      preferences: (insertAttendee.preferences as any) ?? null,
       id,
       engagementScore: 0,
       registrationDate: now,
@@ -292,7 +307,11 @@ The EventBoost Team`,
   async createEventRegistration(insertRegistration: InsertEventRegistration): Promise<EventRegistration> {
     const id = randomUUID();
     const registration: EventRegistration = {
-      ...insertRegistration,
+      eventId: insertRegistration.eventId,
+      attendeeId: insertRegistration.attendeeId,
+      attended: insertRegistration.attended ?? null,
+      attendanceTime: insertRegistration.attendanceTime ?? null,
+      feedback: (insertRegistration.feedback as any) ?? null,
       id,
       registrationDate: new Date(),
     };
@@ -341,9 +360,18 @@ The EventBoost Team`,
   async createEmailCampaign(insertCampaign: InsertEmailCampaign): Promise<EmailCampaign> {
     const id = randomUUID();
     const campaign: EmailCampaign = {
-      ...insertCampaign,
+      name: insertCampaign.name,
+      type: insertCampaign.type as any,
+      subject: insertCampaign.subject,
+      content: insertCampaign.content,
+      status: (insertCampaign.status as any) ?? null,
+      eventId: insertCampaign.eventId ?? null,
+      templateId: insertCampaign.templateId ?? null,
+      scheduledAt: insertCampaign.scheduledAt ?? null,
+      targetAudience: (insertCampaign.targetAudience as any) ?? null,
       id,
       createdAt: new Date(),
+      sentAt: null,
     };
     this.emailCampaigns.set(id, campaign);
     return campaign;
@@ -383,7 +411,12 @@ The EventBoost Team`,
     const id = randomUUID();
     const now = new Date();
     const template: EmailTemplate = {
-      ...insertTemplate,
+      name: insertTemplate.name,
+      type: insertTemplate.type as any,
+      subject: insertTemplate.subject,
+      content: insertTemplate.content,
+      variables: insertTemplate.variables ?? null,
+      isActive: insertTemplate.isActive ?? null,
       id,
       createdAt: now,
       updatedAt: now,
@@ -461,7 +494,13 @@ The EventBoost Team`,
   async createContentPreview(insertPreview: InsertContentPreview): Promise<ContentPreview> {
     const id = randomUUID();
     const preview: ContentPreview = {
-      ...insertPreview,
+      eventId: insertPreview.eventId,
+      title: insertPreview.title,
+      contentType: insertPreview.contentType as any,
+      description: insertPreview.description ?? null,
+      url: insertPreview.url ?? null,
+      fileData: insertPreview.fileData ?? null,
+      targetInterests: insertPreview.targetInterests ?? null,
       id,
       createdAt: new Date(),
     };
@@ -473,7 +512,11 @@ The EventBoost Team`,
   async createAnalyticsEvent(insertEvent: InsertAnalyticsEvent): Promise<AnalyticsEvent> {
     const id = randomUUID();
     const event: AnalyticsEvent = {
-      ...insertEvent,
+      eventType: insertEvent.eventType as any,
+      eventId: insertEvent.eventId ?? null,
+      attendeeId: insertEvent.attendeeId ?? null,
+      campaignId: insertEvent.campaignId ?? null,
+      metadata: insertEvent.metadata ?? null,
       id,
       timestamp: new Date(),
     };

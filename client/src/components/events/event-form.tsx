@@ -75,22 +75,22 @@ export function EventForm({ event, onSuccess }: EventFormProps) {
     resolver: zodResolver(eventFormSchema),
     defaultValues: {
       title: event?.title || "",
-      description: event?.description || "",
+      description: event?.description ?? "",
       startDate: event?.startDate ? new Date(event.startDate) : new Date(),
       endDate: event?.endDate ? new Date(event.endDate) : undefined,
-      timezone: event?.timezone || "UTC",
-      maxAttendees: event?.maxAttendees || undefined,
+      timezone: event?.timezone ?? "UTC",
+      maxAttendees: event?.maxAttendees ?? undefined,
       isPublic: event?.isPublic ?? true,
-      status: event?.status || "draft",
-      imageUrl: event?.imageUrl || "",
-      location: event?.location || "",
-      tags: event?.tags || [],
+      status: (event?.status as any) || "draft",
+      imageUrl: event?.imageUrl ?? "",
+      location: event?.location ?? "",
+      tags: event?.tags ?? [],
     },
   });
 
   const onSubmit = (data: z.infer<typeof eventFormSchema>) => {
     if (event) {
-      updateEventMutation.mutate(data);
+      updateEventMutation.mutate(data as any);
     } else {
       createEventMutation.mutate(data);
     }
@@ -143,7 +143,8 @@ export function EventForm({ event, onSuccess }: EventFormProps) {
                     <Textarea 
                       placeholder="Describe your event..." 
                       className="min-h-[100px]" 
-                      {...field} 
+                      {...field}
+                      value={field.value ?? ""}
                       data-testid="input-description"
                     />
                   </FormControl>
@@ -161,7 +162,8 @@ export function EventForm({ event, onSuccess }: EventFormProps) {
                   <FormControl>
                     <Input 
                       placeholder="https://example.com/image.jpg" 
-                      {...field} 
+                      {...field}
+                      value={field.value ?? ""}
                       data-testid="input-image-url"
                     />
                   </FormControl>
@@ -238,7 +240,8 @@ export function EventForm({ event, onSuccess }: EventFormProps) {
                       <MapPin className="w-4 h-4 text-muted-foreground" />
                       <Input 
                         placeholder="Virtual, Address, or Meeting Link" 
-                        {...field} 
+                        {...field}
+                        value={field.value ?? ""}
                         data-testid="input-location"
                       />
                     </div>
@@ -254,7 +257,7 @@ export function EventForm({ event, onSuccess }: EventFormProps) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Timezone</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} defaultValue={field.value ?? undefined}>
                     <FormControl>
                       <SelectTrigger data-testid="select-timezone">
                         <SelectValue placeholder="Select timezone" />
@@ -296,6 +299,7 @@ export function EventForm({ event, onSuccess }: EventFormProps) {
                         type="number"
                         placeholder="Unlimited"
                         {...field}
+                        value={field.value ?? ""}
                         onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
                         data-testid="input-max-attendees"
                       />
@@ -315,7 +319,7 @@ export function EventForm({ event, onSuccess }: EventFormProps) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Status</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} defaultValue={field.value ?? undefined}>
                     <FormControl>
                       <SelectTrigger data-testid="select-status">
                         <SelectValue />
@@ -347,7 +351,7 @@ export function EventForm({ event, onSuccess }: EventFormProps) {
                   </div>
                   <FormControl>
                     <Switch
-                      checked={field.value}
+                      checked={field.value ?? false}
                       onCheckedChange={field.onChange}
                       data-testid="switch-public"
                     />
