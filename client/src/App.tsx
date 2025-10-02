@@ -5,15 +5,17 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Header } from "@/components/layout/header";
+import { OnboardingTour } from "@/components/walkthrough/onboarding-tour";
 import Dashboard from "@/pages/dashboard";
 import Events from "@/pages/events";
 import Attendees from "@/pages/attendees";
 import Campaigns from "@/pages/campaigns";
 import Analytics from "@/pages/analytics";
 import Templates from "@/pages/templates";
+import PublicRegister from "@/pages/public-register";
 import NotFound from "@/pages/not-found";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 function Router() {
   return (
@@ -24,6 +26,7 @@ function Router() {
       <Route path="/campaigns" component={Campaigns} />
       <Route path="/analytics" component={Analytics} />
       <Route path="/templates" component={Templates} />
+      <Route path="/register" component={PublicRegister} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -31,7 +34,20 @@ function Router() {
 
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showTour, setShowTour] = useState(false);
   const isMobile = useIsMobile();
+
+  useEffect(() => {
+    const hasCompletedTour = localStorage.getItem("onboarding-tour-completed");
+    if (!hasCompletedTour) {
+      setTimeout(() => setShowTour(true), 500);
+    }
+  }, []);
+
+  const handleTourComplete = () => {
+    localStorage.setItem("onboarding-tour-completed", "true");
+    setShowTour(false);
+  };
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -52,6 +68,7 @@ function App() {
             </div>
           </main>
         </div>
+        {showTour && <OnboardingTour onComplete={handleTourComplete} />}
         <Toaster />
       </TooltipProvider>
     </QueryClientProvider>

@@ -5,42 +5,44 @@
 @tailwind utilities;
 
 :root {
-  --background: hsl(210, 40%, 98%);
+  --background: hsl(220, 15%, 97%);
   --foreground: hsl(222, 47%, 11%);
   --card: hsl(0, 0%, 100%);
   --card-foreground: hsl(222, 47%, 11%);
   --popover: hsl(0, 0%, 100%);
   --popover-foreground: hsl(222, 47%, 11%);
-  --primary: hsl(239, 84%, 67%);
+  --primary: hsl(262, 83%, 58%);
   --primary-foreground: hsl(0, 0%, 100%);
-  --secondary: hsl(280, 89%, 66%);
+  --secondary: hsl(217, 91%, 60%);
   --secondary-foreground: hsl(0, 0%, 100%);
-  --muted: hsl(217, 33%, 97%);
-  --muted-foreground: hsl(215, 16%, 47%);
-  --accent: hsl(189, 94%, 43%);
+  --muted: hsl(220, 14%, 96%);
+  --muted-foreground: hsl(220, 9%, 46%);
+  --accent: hsl(340, 82%, 52%);
   --accent-foreground: hsl(0, 0%, 100%);
+  --success: hsl(142, 71%, 45%);
+  --success-foreground: hsl(0, 0%, 100%);
   --destructive: hsl(0, 84%, 60%);
   --destructive-foreground: hsl(0, 0%, 100%);
-  --border: hsl(214, 32%, 91%);
-  --input: hsl(214, 32%, 91%);
-  --ring: hsl(239, 84%, 67%);
-  --chart-1: hsl(239, 84%, 67%);
-  --chart-2: hsl(280, 89%, 66%);
-  --chart-3: hsl(189, 94%, 43%);
-  --chart-4: hsl(142, 76%, 36%);
+  --border: hsl(220, 13%, 91%);
+  --input: hsl(220, 13%, 91%);
+  --ring: hsl(262, 83%, 58%);
+  --chart-1: hsl(262, 83%, 58%);
+  --chart-2: hsl(217, 91%, 60%);
+  --chart-3: hsl(340, 82%, 52%);
+  --chart-4: hsl(142, 71%, 45%);
   --chart-5: hsl(43, 96%, 56%);
   --sidebar: hsl(0, 0%, 100%);
   --sidebar-foreground: hsl(222, 47%, 11%);
-  --sidebar-primary: hsl(239, 84%, 67%);
+  --sidebar-primary: hsl(262, 83%, 58%);
   --sidebar-primary-foreground: hsl(0, 0%, 100%);
-  --sidebar-accent: hsl(217, 33%, 97%);
-  --sidebar-accent-foreground: hsl(239, 84%, 67%);
-  --sidebar-border: hsl(214, 32%, 91%);
-  --sidebar-ring: hsl(239, 84%, 67%);
+  --sidebar-accent: hsl(220, 14%, 96%);
+  --sidebar-accent-foreground: hsl(262, 83%, 58%);
+  --sidebar-border: hsl(220, 13%, 91%);
+  --sidebar-ring: hsl(262, 83%, 58%);
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-heading: 'Poppins', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
-  --radius: 0.5rem;
+  --radius: 0.75rem;
   --shadow-2xs: 0px 1px 2px 0px hsl(0, 0%, 0%, 0.05);
   --shadow-xs: 0px 1px 2px 0px hsl(0, 0%, 0%, 0.05);
   --shadow-sm: 0px 1px 2px 0px hsl(0, 0%, 0%, 0.05), 0px 1px 3px 0px hsl(0, 0%, 0%, 0.1);
@@ -54,38 +56,40 @@
 }
 
 .dark {
-  --background: hsl(222, 47%, 11%);
+  --background: hsl(224, 71%, 4%);
   --foreground: hsl(210, 40%, 98%);
-  --card: hsl(222, 84%, 4%);
+  --card: hsl(224, 71%, 6%);
   --card-foreground: hsl(210, 40%, 98%);
-  --popover: hsl(222, 84%, 4%);
+  --popover: hsl(224, 71%, 6%);
   --popover-foreground: hsl(210, 40%, 98%);
-  --primary: hsl(239, 84%, 67%);
+  --primary: hsl(263, 70%, 50%);
   --primary-foreground: hsl(0, 0%, 100%);
-  --secondary: hsl(215, 25%, 27%);
-  --secondary-foreground: hsl(210, 40%, 98%);
-  --muted: hsl(217, 33%, 17%);
+  --secondary: hsl(217, 91%, 60%);
+  --secondary-foreground: hsl(0, 0%, 100%);
+  --muted: hsl(223, 47%, 11%);
   --muted-foreground: hsl(215, 20%, 65%);
-  --accent: hsl(189, 94%, 43%);
+  --accent: hsl(340, 82%, 52%);
   --accent-foreground: hsl(0, 0%, 100%);
+  --success: hsl(142, 71%, 45%);
+  --success-foreground: hsl(0, 0%, 100%);
   --destructive: hsl(0, 84%, 60%);
   --destructive-foreground: hsl(0, 0%, 100%);
-  --border: hsl(217, 33%, 17%);
-  --input: hsl(217, 33%, 17%);
-  --ring: hsl(239, 84%, 67%);
-  --chart-1: hsl(239, 84%, 67%);
-  --chart-2: hsl(280, 89%, 66%);
-  --chart-3: hsl(189, 94%, 43%);
-  --chart-4: hsl(142, 76%, 36%);
+  --border: hsl(215, 27%, 17%);
+  --input: hsl(215, 27%, 17%);
+  --ring: hsl(263, 70%, 50%);
+  --chart-1: hsl(263, 70%, 50%);
+  --chart-2: hsl(217, 91%, 60%);
+  --chart-3: hsl(340, 82%, 52%);
+  --chart-4: hsl(142, 71%, 45%);
   --chart-5: hsl(43, 96%, 56%);
-  --sidebar: hsl(222, 84%, 4%);
+  --sidebar: hsl(224, 71%, 6%);
   --sidebar-foreground: hsl(210, 40%, 98%);
-  --sidebar-primary: hsl(239, 84%, 67%);
+  --sidebar-primary: hsl(263, 70%, 50%);
   --sidebar-primary-foreground: hsl(0, 0%, 100%);
-  --sidebar-accent: hsl(217, 33%, 17%);
-  --sidebar-accent-foreground: hsl(239, 84%, 67%);
-  --sidebar-border: hsl(217, 33%, 17%);
-  --sidebar-ring: hsl(239, 84%, 67%);
+  --sidebar-accent: hsl(223, 47%, 11%);
+  --sidebar-accent-foreground: hsl(263, 70%, 50%);
+  --sidebar-border: hsl(215, 27%, 17%);
+  --sidebar-ring: hsl(263, 70%, 50%);
 }
 
 @layer base {
@@ -110,14 +114,29 @@
   .gradient-accent {
     background: linear-gradient(135deg, hsl(var(--accent)) 0%, hsl(var(--primary)) 100%);
   }
+
+  .gradient-hero {
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--secondary)) 50%, hsl(var(--accent)) 100%);
+  }
   
   .hover-lift {
     transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
   
   .hover-lift:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.15);
+  }
+
+  .glass-effect {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .dark .glass-effect {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
   }
   
   .sidebar-transition {
@@ -143,5 +162,21 @@
   @keyframes skeleton-loading {
     0% { background-position: 200% 0; }
     100% { background-position: -200% 0; }
+  }
+
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.5s ease-out;
+  }
+
+  .text-gradient {
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--secondary)) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 }
